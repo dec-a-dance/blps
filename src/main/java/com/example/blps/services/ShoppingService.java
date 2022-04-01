@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,13 +108,14 @@ public class ShoppingService {
         }
     }
 
-    public boolean deleteFromCart(String username, long prodId){
+    @Transactional
+    public int deleteFromCart(String username, long prodId){
         try {
             User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No such user"));
             Product product = productRepository.findById(prodId).orElseThrow(() -> new UsernameNotFoundException("No such product"));
             return shoppingCartRepository.deleteByKey_UserAndKey_ProductAndConfirmed(user, product, false);
         }catch(UsernameNotFoundException e) {
-            return false;
+            return 0;
         }
         }
 

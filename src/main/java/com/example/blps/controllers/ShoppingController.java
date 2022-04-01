@@ -72,8 +72,8 @@ public class ShoppingController {
     //удалить из корзины в бд
     @PostMapping("/deleteFromCart")
     public ResponseEntity<String> deleteFromCart(@RequestBody AddToCartDTO dto){
-        boolean isDeleted = shoppingService.deleteFromCart(dto.getUsername(), dto.getProductId());
-        if(isDeleted){
+        int isDeleted = shoppingService.deleteFromCart(dto.getUsername(), dto.getProductId());
+        if(isDeleted>0){
             return new ResponseEntity<>("Successfully deleted from your cart.", HttpStatus.OK);
         }
         else{
