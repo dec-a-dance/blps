@@ -32,12 +32,16 @@ public class ShoppingService {
     }
 
     public boolean addToCart(long productId, String username, long count){
+        log.debug("add to cart");
         try {
+            log.debug("Add to cart");
             ShoppingCart cart = new ShoppingCart();
             cart.setCount(count);
             User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No such user"));
+            log.debug("User found.");
             cart.getKey().setUser(user);
             Product product = productRepository.findById(productId).orElseThrow(() -> new UsernameNotFoundException("No such product"));
+            log.debug("Product found.");
             cart.getKey().setProduct(product);
             cart.setConfirmed(false);
             shoppingCartRepository.save(cart);
@@ -101,10 +105,14 @@ public class ShoppingService {
     }
 
     public boolean deleteFromCart(String username, long prodId){
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No such user"));
-        Product product = productRepository.findById(prodId).orElseThrow(() -> new UsernameNotFoundException("No such product"));
-        return shoppingCartRepository.deleteByKey_UserAndKey_ProductAndConfirmed(user, product, false);
-    }
+        try {
+            User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No such user"));
+            Product product = productRepository.findById(prodId).orElseThrow(() -> new UsernameNotFoundException("No such product"));
+            return shoppingCartRepository.deleteByKey_UserAndKey_ProductAndConfirmed(user, product, false);
+        }catch(UsernameNotFoundException e) {
+            return false;
+        }
+        }
 
     public boolean createOrderFromRequest(UserOrderDTO dto){
         try {

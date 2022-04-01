@@ -32,7 +32,7 @@ public class OrderProduct {
     }
 
     @EmbeddedId
-    private OrderProductKey key;
+    private OrderProductKey key = new OrderProductKey();
 
     private long count;
 }

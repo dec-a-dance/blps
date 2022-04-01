@@ -56,7 +56,7 @@ public class AuthService {
     public boolean login(LoginDTO token){
         try {
             AuthToken check = authTokenRepository.findByUsername(token.getUsername()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-            if (bCryptPasswordEncoder.encode(token.getPassword()) == check.getPassword()) {
+            if (bCryptPasswordEncoder.matches(token.getPassword(), check.getPassword())) {
                 return true;
             }
             return false;

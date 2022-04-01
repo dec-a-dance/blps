@@ -31,7 +31,7 @@ public class ShoppingCart {
     }
 
     @EmbeddedId
-    private ShoppingCartKey key;
+    private ShoppingCartKey key = new ShoppingCartKey();
 
     private long count;
 
