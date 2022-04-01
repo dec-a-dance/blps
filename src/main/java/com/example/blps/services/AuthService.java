@@ -29,7 +29,7 @@ public class AuthService {
     }
 
     public boolean saveUser(RegisterDTO dto){
-        if(authTokenRepository.findByUsername(dto.getUsername())!=null){
+        if(authTokenRepository.findByUsername(dto.getUsername()).isPresent()){
             log.debug("User with username {} already exist.", dto.getUsername());
             return false;
         }
@@ -54,10 +54,15 @@ public class AuthService {
     }
 
     public boolean login(LoginDTO token){
-        AuthToken check = authTokenRepository.findByUsername(token.getUsername()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        if(bCryptPasswordEncoder.encode(token.getPassword())==check.getPassword()){
-            return true;
+        try {
+            AuthToken check = authTokenRepository.findByUsername(token.getUsername()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            if (bCryptPasswordEncoder.encode(token.getPassword()) == check.getPassword()) {
+                return true;
+            }
+            return false;
         }
-        return false;
+        catch(UsernameNotFoundException e){
+            return false;
+        }
     }
 }
