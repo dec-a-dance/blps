@@ -65,7 +65,7 @@ public class ShoppingController {
             return new ResponseEntity<>("Successfully confirmed your order", HttpStatus.OK);
         }
         else{
-            return new ResponseEntity<>("Your input is invalid :(", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Your input is invalid :( (maybe cart is empty)", HttpStatus.BAD_REQUEST);
         }
     }
 

@@ -2,6 +2,7 @@ package com.example.blps.services;
 
 import com.example.blps.dto.*;
 import com.example.blps.entities.*;
+import com.example.blps.exceptions.EmptyCartException;
 import com.example.blps.repositories.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -60,6 +61,9 @@ public class ShoppingService {
         try {
             User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No such user"));
             List<ShoppingCart> carts = shoppingCartRepository.findAllByKeyUserAndConfirmed(user, false);
+            if (carts.isEmpty()){
+                throw new EmptyCartException("Your cart is empty.");
+            }
             Order order = new Order();
             order.setUser(user);
             Order fullOrder = orderRepository.save(order);
@@ -72,7 +76,7 @@ public class ShoppingService {
             }
             return true;
         }
-        catch(UsernameNotFoundException e){
+        catch(UsernameNotFoundException | EmptyCartException e){
             return false;
         }
     }
