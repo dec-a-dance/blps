@@ -22,12 +22,14 @@ public class ShoppingController {
         this.shoppingService=shoppingService;
     }
 
+    //типа показать ассортимент
     @GetMapping("/getProducts")
     public ResponseEntity<List<ProductDTO>> getProducts(){
         List<ProductDTO> products = shoppingService.getProducts();
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
+    //добавить в корзину в бд
     @PostMapping("/addToCart")
     public ResponseEntity<String> addToCart(@RequestBody AddToCartDTO dto){
         boolean isAdded = shoppingService.addToCart(dto.getProductId(), dto.getUsername(), dto.getCount());
@@ -39,6 +41,7 @@ public class ShoppingController {
         }
     }
 
+    //по факту нужно послать только username
     @PostMapping("/getMyOrders")
     public ResponseEntity<List<OrderDTO>> getOrders(@RequestBody AuthToken token){
         List<OrderDTO> orders = shoppingService.getUserOrders(token.getUsername());
@@ -50,6 +53,9 @@ public class ShoppingController {
         }
     }
 
+
+    //оформить корзину в бд в заказ
+    //по факту нужно послать только username
     @PostMapping("/confirmOrder")
     public ResponseEntity<String> confirmOrder(@RequestBody AuthToken token){
         boolean isConfirmed = shoppingService.confirmOrder(token.getUsername());
@@ -61,6 +67,7 @@ public class ShoppingController {
         }
     }
 
+    //удалить из корзины в бд
     @PostMapping("/deleteFromCart")
     public ResponseEntity<String> deleteFromCart(@RequestBody AddToCartDTO dto){
         boolean isDeleted = shoppingService.deleteFromCart(dto.getUsername(), dto.getProductId());
@@ -84,6 +91,8 @@ public class ShoppingController {
         }
     }
 
+    //посмотреть что сейчас в корзине
+    //по факту нужно послать только username
     @PostMapping("/getMyCart")
     public ResponseEntity<List<OrderPositionDTO>> getCart(@RequestBody AuthToken token){
         List<OrderPositionDTO> cart = shoppingService.getCart(token.getUsername());
