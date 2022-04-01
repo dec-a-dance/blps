@@ -4,35 +4,36 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.NotNull;
-
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Embeddable
 @Data
-@Entity(name="order_product")
-@Table(name="order_product")
-public class OrderProduct {
+@Entity(name="shopping_cart")
+@Table(name="shopping_cart")
+public class ShoppingCart {
     @Embeddable
-    public static class OrderProductKey implements Serializable {
+    public static class ShoppingCartKey implements Serializable {
         @NotNull
         @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn (name = "product_id", referencedColumnName = "product_id")
+        @JoinColumn(name = "product_id", referencedColumnName = "product_id")
         @Getter
         @Setter
         private Product product;
 
         @NotNull
         @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn (name = "order_id", referencedColumnName = "order_id")
+        @JoinColumn(name = "username", referencedColumnName = "username")
         @Getter
         @Setter
-        private Order order;
+        private User user;
     }
 
     @EmbeddedId
-    private OrderProductKey key;
+    private ShoppingCartKey key;
 
     private long count;
+
+    private boolean confirmed;
 }
