@@ -1,9 +1,6 @@
 package com.example.blps.controllers;
 
-import com.example.blps.dto.AddToCartDTO;
-import com.example.blps.dto.OrderDTO;
-import com.example.blps.dto.ProductDTO;
-import com.example.blps.dto.UserOrderDTO;
+import com.example.blps.dto.*;
 import com.example.blps.entities.AuthToken;
 import com.example.blps.services.ShoppingService;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +42,12 @@ public class ShoppingController {
     @PostMapping("/getMyOrders")
     public ResponseEntity<List<OrderDTO>> getOrders(@RequestBody AuthToken token){
         List<OrderDTO> orders = shoppingService.getUserOrders(token.getUsername());
-        return new ResponseEntity<>(orders, HttpStatus.OK);
+        if(orders!=null) {
+            return new ResponseEntity<>(orders, HttpStatus.OK);
+        }
+        else{
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PostMapping("/confirmOrder")
@@ -82,5 +84,14 @@ public class ShoppingController {
         }
     }
 
-
+    @PostMapping("/getMyCart")
+    public ResponseEntity<List<OrderPositionDTO>> getCart(@RequestBody AuthToken token){
+        List<OrderPositionDTO> cart = shoppingService.getCart(token.getUsername());
+        if(cart!=null) {
+            return new ResponseEntity<>(cart, HttpStatus.OK);
+        }
+        else{
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+    }
 }

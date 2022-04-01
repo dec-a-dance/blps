@@ -8,4 +8,5 @@ public class OrderPositionDTO {
     private String name;
     private float price;
     private String categoryName;
+    private long count;
 }

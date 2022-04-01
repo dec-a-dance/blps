@@ -70,28 +70,34 @@ public class ShoppingService {
     }
 
     public List<OrderDTO> getUserOrders(String username){
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No such user"));
-        List<Order> orders = orderRepository.findAllByUser(user);
-        List<OrderDTO> response = new ArrayList<OrderDTO>();
-        for (Order o: orders){
-            List<OrderProduct> products = orderProductRepository.findAllByKey_Order(o);
-            List<OrderPositionDTO> positions = new ArrayList<OrderPositionDTO>();
-            for (OrderProduct p: products){
-                OrderPositionDTO pos = new OrderPositionDTO();
-                Product prod = p.getKey().getProduct();
-                pos.setId(prod.getId());
-                pos.setName(prod.getName());
-                pos.setPrice(prod.getPrice());
-                pos.setCategoryName(prod.getCategory().getName());
-                positions.add(pos);
+        try {
+            User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No such user"));
+            List<Order> orders = orderRepository.findAllByUser(user);
+            List<OrderDTO> response = new ArrayList<OrderDTO>();
+            for (Order o : orders) {
+                List<OrderProduct> products = orderProductRepository.findAllByKey_Order(o);
+                List<OrderPositionDTO> positions = new ArrayList<OrderPositionDTO>();
+                for (OrderProduct p : products) {
+                    OrderPositionDTO pos = new OrderPositionDTO();
+                    Product prod = p.getKey().getProduct();
+                    pos.setId(prod.getId());
+                    pos.setName(prod.getName());
+                    pos.setPrice(prod.getPrice());
+                    pos.setCount(p.getCount());
+                    pos.setCategoryName(prod.getCategory().getName());
+                    positions.add(pos);
+                }
+                OrderDTO dto = new OrderDTO();
+                dto.setUserId(user.getId());
+                dto.setId(o.getId());
+                dto.setProducts(positions);
+                response.add(dto);
             }
-            OrderDTO dto = new OrderDTO();
-            dto.setUserId(user.getId());
-            dto.setId(o.getId());
-            dto.setProducts(positions);
-            response.add(dto);
+            return response;
         }
-        return response;
+        catch(UsernameNotFoundException e){
+            return null;
+        }
     }
 
     public boolean deleteFromCart(String username, long prodId){
@@ -135,4 +141,25 @@ public class ShoppingService {
         return out;
     }
 
+
+    public List<OrderPositionDTO> getCart(String username){
+        try {
+            User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No such user"));
+            List<ShoppingCart> cart = shoppingCartRepository.findAllByKeyUserAndConfirmed(user, false);
+            List<OrderPositionDTO> out = new ArrayList<>();
+            for (ShoppingCart c : cart) {
+                OrderPositionDTO dto = new OrderPositionDTO();
+                dto.setCategoryName(c.getKey().getProduct().getCategory().getName());
+                dto.setCount(c.getCount());
+                dto.setName(c.getKey().getProduct().getName());
+                dto.setPrice(c.getKey().getProduct().getPrice());
+                dto.setId(c.getKey().getProduct().getId());
+                out.add(dto);
+            }
+            return out;
+        }
+        catch(UsernameNotFoundException e){
+            return null;
+        }
+    }
 }
