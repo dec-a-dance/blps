@@ -6,9 +6,9 @@ import lombok.Data;
 
 @Data
 public class AddToCartDTO {
-    private AuthToken authToken;
+    private String username;
 
-    private Product product;
+    private long productId;
 
     private long count;
 }

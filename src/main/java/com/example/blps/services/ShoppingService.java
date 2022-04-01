@@ -1,7 +1,6 @@
 package com.example.blps.services;
 
-import com.example.blps.dto.OrderDTO;
-import com.example.blps.dto.OrderPositionDTO;
+import com.example.blps.dto.*;
 import com.example.blps.entities.*;
 import com.example.blps.repositories.*;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +31,8 @@ public class ShoppingService {
         this.productRepository = productRepository;
     }
 
-    public void addToCart(long productId, String username, long count){
+    public boolean addToCart(long productId, String username, long count){
+        try {
             ShoppingCart cart = new ShoppingCart();
             cart.setCount(count);
             User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No such user"));
@@ -41,20 +41,31 @@ public class ShoppingService {
             cart.getKey().setProduct(product);
             cart.setConfirmed(false);
             shoppingCartRepository.save(cart);
+            return true;
+        }
+        catch(UsernameNotFoundException e){
+            return false;
+        }
     }
 
-    public void confirmOrder(String username){
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No such user"));
-        List<ShoppingCart> carts = shoppingCartRepository.findAllByKeyUserAndConfirmed(user, false);
-        Order order = new Order();
-        order.setUser(user);
-        Order fullOrder = orderRepository.save(order);
-        for (ShoppingCart c: carts){
-            OrderProduct ent = new OrderProduct();
-            ent.setCount(c.getCount());
-            ent.getKey().setOrder(fullOrder);
-            ent.getKey().setProduct(c.getKey().getProduct());
-            orderProductRepository.save(ent);
+    public boolean confirmOrder(String username){
+        try {
+            User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No such user"));
+            List<ShoppingCart> carts = shoppingCartRepository.findAllByKeyUserAndConfirmed(user, false);
+            Order order = new Order();
+            order.setUser(user);
+            Order fullOrder = orderRepository.save(order);
+            for (ShoppingCart c : carts) {
+                OrderProduct ent = new OrderProduct();
+                ent.setCount(c.getCount());
+                ent.getKey().setOrder(fullOrder);
+                ent.getKey().setProduct(c.getKey().getProduct());
+                orderProductRepository.save(ent);
+            }
+            return true;
+        }
+        catch(UsernameNotFoundException e){
+            return false;
         }
     }
 
@@ -82,4 +93,46 @@ public class ShoppingService {
         }
         return response;
     }
+
+    public boolean deleteFromCart(String username, long prodId){
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No such user"));
+        Product product = productRepository.findById(prodId).orElseThrow(() -> new UsernameNotFoundException("No such product"));
+        return shoppingCartRepository.deleteByKey_UserAndKey_ProductAndConfirmed(user, product, false);
+    }
+
+    public boolean createOrderFromRequest(UserOrderDTO dto){
+        try {
+            Order order = new Order();
+            User user = userRepository.findByUsername(dto.getUsername()).orElseThrow(() -> new UsernameNotFoundException("No such user"));
+            order.setUser(user);
+            Order fullOrder = orderRepository.save(order);
+            for (UserOrderPositionDTO d : dto.getProducts()) {
+                Product product = productRepository.findById(d.getProductId()).orElseThrow(() -> new UsernameNotFoundException("No such product"));
+                OrderProduct op = new OrderProduct();
+                op.setCount(d.getCount());
+                op.getKey().setOrder(fullOrder);
+                op.getKey().setProduct(product);
+                orderProductRepository.save(op);
+            }
+        }
+        catch(UsernameNotFoundException e){
+            return false;
+        }
+        return true;
+    }
+
+    public List<ProductDTO> getProducts(){
+        List<Product> products = productRepository.findAll();
+        List<ProductDTO> out = new ArrayList<>();
+        for (Product p: products){
+            ProductDTO dto = new ProductDTO();
+            dto.setName(p.getName());
+            dto.setCategory(p.getCategory().getName());
+            dto.setPrice(p.getPrice());
+            dto.setId(p.getId());
+            out.add(dto);
+        }
+        return out;
+    }
+
 }

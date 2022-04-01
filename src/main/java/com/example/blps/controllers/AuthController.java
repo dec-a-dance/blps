@@ -23,6 +23,7 @@ public class AuthController {
         this.authService = authService;
     }
 
+    //регистрация юзера
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterDTO dto){
         boolean success = authService.saveUser(dto);
@@ -34,6 +35,7 @@ public class AuthController {
         }
     }
 
+    //логин
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginDTO dto){
         boolean success = authService.login(dto);
