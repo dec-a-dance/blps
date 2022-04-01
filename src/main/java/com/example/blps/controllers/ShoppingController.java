@@ -2,6 +2,8 @@ package com.example.blps.controllers;
 
 import com.example.blps.dto.*;
 import com.example.blps.entities.AuthToken;
+import com.example.blps.entities.Category;
+import com.example.blps.entities.Product;
 import com.example.blps.services.ShoppingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +100,23 @@ public class ShoppingController {
         List<OrderPositionDTO> cart = shoppingService.getCart(token.getUsername());
         if(cart!=null) {
             return new ResponseEntity<>(cart, HttpStatus.OK);
+        }
+        else{
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/getCategories")
+    public ResponseEntity<List<Category>> getCategories(){
+        List<Category> categories = shoppingService.getCategories();
+        return new ResponseEntity<>(categories, HttpStatus.OK);
+    }
+
+    @PostMapping("/getByCategory")
+    public ResponseEntity<List<Product>> getByCategory(@RequestBody CategoryDTO dto){
+        List<Product> products = shoppingService.getAllByCategory(dto.getId());
+        if(products!=null) {
+            return new ResponseEntity<>(products, HttpStatus.OK);
         }
         else{
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);

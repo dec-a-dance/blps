@@ -18,17 +18,20 @@ public class ShoppingService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
     public ShoppingService(OrderProductRepository orderProductRepository,
                            ShoppingCartRepository shoppingCartRepository,
                            OrderRepository orderRepository,
                            UserRepository userRepository,
-                           ProductRepository productRepository){
+                           ProductRepository productRepository,
+                           CategoryRepository categoryRepository){
         this.orderRepository = orderRepository;
         this.orderProductRepository = orderProductRepository;
         this.shoppingCartRepository = shoppingCartRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public boolean addToCart(long productId, String username, long count){
@@ -167,6 +170,19 @@ public class ShoppingService {
             return out;
         }
         catch(UsernameNotFoundException e){
+            return null;
+        }
+    }
+
+    public List<Category> getCategories(){
+        return categoryRepository.findAll();
+    }
+
+    public List<Product> getAllByCategory(long categoryId){
+        try {
+            Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new UsernameNotFoundException("No such category"));
+            return productRepository.findAllByCategory(category);
+        }catch(UsernameNotFoundException e) {
             return null;
         }
     }
