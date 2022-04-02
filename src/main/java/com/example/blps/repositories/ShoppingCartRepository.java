@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface ShoppingCartRepository extends JpaRepository<ShoppingCart, Long> {
     public List<ShoppingCart> findAllByKeyUserAndConfirmed(User user, boolean conf);
     public int deleteByKey_UserAndKey_ProductAndConfirmed(User user, Product product, boolean conf);
+    ShoppingCart findByKey_UserAndKey_ProductAndConfirmed(User user, Product product, boolean conf);
 }

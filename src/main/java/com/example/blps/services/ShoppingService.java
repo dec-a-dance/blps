@@ -12,6 +12,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Slf4j
 @Service
 public class ShoppingService {
@@ -37,19 +38,24 @@ public class ShoppingService {
     }
 
     public boolean addToCart(long productId, String username, long count){
-        log.debug("add to cart");
         try {
-            log.debug("Add to cart");
-            ShoppingCart cart = new ShoppingCart();
-            cart.setCount(count);
+
             User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No such user"));
-            log.debug("User found.");
-            cart.getKey().setUser(user);
             Product product = productRepository.findById(productId).orElseThrow(() -> new UsernameNotFoundException("No such product"));
-            log.debug("Product found.");
-            cart.getKey().setProduct(product);
-            cart.setConfirmed(false);
-            shoppingCartRepository.save(cart);
+            ShoppingCart current = shoppingCartRepository.findByKey_UserAndKey_ProductAndConfirmed(user, product, false);
+            if (current!=null){
+                long currentCount = current.getCount();
+                current.setCount(currentCount + count);
+                shoppingCartRepository.save(current);
+            }
+            else{
+                ShoppingCart cart = new ShoppingCart();
+                cart.setCount(count);
+                cart.getKey().setUser(user);
+                cart.getKey().setProduct(product);
+                cart.setConfirmed(false);
+                shoppingCartRepository.save(cart);
+            }
             return true;
         }
         catch(UsernameNotFoundException e){
@@ -73,6 +79,8 @@ public class ShoppingService {
                 ent.getKey().setOrder(fullOrder);
                 ent.getKey().setProduct(c.getKey().getProduct());
                 orderProductRepository.save(ent);
+                c.setConfirmed(true);
+                shoppingCartRepository.save(c);
             }
             return true;
         }
