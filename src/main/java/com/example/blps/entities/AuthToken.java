@@ -14,6 +14,8 @@ import javax.validation.constraints.Size;
 import java.util.Collection;
 import java.util.Collections;
 
+import static javax.persistence.EnumType.STRING;
+
 @Data
 @Entity(name="auth_token")
 @Table(name="auth_token")
@@ -36,8 +38,8 @@ public class AuthToken implements UserDetails {
     @Column
     private String password;
 
-    @NotEmpty
-    @JsonIgnore
+    @Enumerated(STRING)
+    @Column(nullable = false)
     private Role role;
 
     @Override

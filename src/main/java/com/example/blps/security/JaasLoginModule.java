@@ -31,12 +31,14 @@ public class JaasLoginModule implements LoginModule {
             Subject subject,
             CallbackHandler callbackHandler,
             Map<String, ?> sharedState,
-            Map<String, ?> oprions){
-
+            Map<String, ?> options){
+        this.subject = subject;
+        this.callbackHandler = callbackHandler;
+        this.authTokenRepository = (AuthTokenRepository) options.get("authTokenRepository");
     }
 
     public boolean login(){
-        NameCallback nameCallback = new NameCallback("login");
+        NameCallback nameCallback = new NameCallback("username");
         PasswordCallback passwordCallback = new PasswordCallback("password", false);
 
         try {
@@ -44,7 +46,7 @@ public class JaasLoginModule implements LoginModule {
             username = nameCallback.getName();
             String password = String.valueOf(passwordCallback.getPassword());
             AuthToken authToken = authTokenRepository.findByUsername(username).orElseThrow(
-                    () -> new RuntimeException("User not found by email")
+                    () -> new UsernameNotFoundException("User not found by email")
             );
             loginSucceeded = passwordEncoder.matches(password, authToken.getPassword());
         } catch (UsernameNotFoundException e) {

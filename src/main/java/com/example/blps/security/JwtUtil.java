@@ -11,7 +11,7 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-    @Value("@{spring.hikari.jwt.secret}")
+    @Value("${blps.jwtSecret}")
     private String jwtSecret;
 
     public String generateToken(String username){

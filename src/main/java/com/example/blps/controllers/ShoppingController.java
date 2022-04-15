@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class ShoppingController {
 
     //добавить в корзину в бд
     @PostMapping("/addToCart")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<String> addToCart(@RequestBody AddToCartDTO dto){
         boolean isAdded = shoppingService.addToCart(dto.getProductId(), dto.getUsername(), dto.getCount());
         if(isAdded){
@@ -45,6 +47,7 @@ public class ShoppingController {
 
     //по факту нужно послать только username
     @GetMapping("/getMyOrders")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<List<OrderDTO>> getOrders(@RequestBody AuthToken token){
         List<OrderDTO> orders = shoppingService.getUserOrders(token.getUsername());
         if(orders!=null) {
@@ -59,6 +62,7 @@ public class ShoppingController {
     //оформить корзину в бд в заказ
     //по факту нужно послать только username
     @PostMapping("/confirmOrder")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<String> confirmOrder(@RequestBody AuthToken token){
         boolean isConfirmed = shoppingService.confirmOrder(token.getUsername());
         if(isConfirmed){
@@ -71,6 +75,7 @@ public class ShoppingController {
 
     //удалить из корзины в бд
     @DeleteMapping("/deleteFromCart")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<String> deleteFromCart(@RequestBody AddToCartDTO dto){
         int isDeleted = shoppingService.deleteFromCart(dto.getUsername(), dto.getProductId());
         if(isDeleted>0){
@@ -96,6 +101,7 @@ public class ShoppingController {
     //посмотреть что сейчас в корзине
     //по факту нужно послать только username
     @GetMapping("/getMyCart")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<List<OrderPositionDTO>> getCart(@RequestBody AuthToken token){
         List<OrderPositionDTO> cart = shoppingService.getCart(token.getUsername());
         if(cart!=null) {

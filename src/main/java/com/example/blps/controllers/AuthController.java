@@ -1,6 +1,7 @@
 package com.example.blps.controllers;
 
 import com.example.blps.dto.LoginDTO;
+import com.example.blps.dto.LoginResponse;
 import com.example.blps.dto.RegisterDTO;
 import com.example.blps.services.AuthService;
 import lombok.extern.slf4j.Slf4j;
@@ -38,9 +39,9 @@ public class AuthController {
     //логин
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginDTO dto){
-        boolean success = authService.login(dto);
-        if (success){
-            return new ResponseEntity<>("Entered successfully.", HttpStatus.OK);
+        LoginResponse success = authService.login(dto);
+        if (success!=null){
+            return new ResponseEntity<>(success.getJwt(), HttpStatus.OK);
         }
         else{
             return new ResponseEntity<>("Wrong credentials.", HttpStatus.BAD_REQUEST);

@@ -55,6 +55,11 @@
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
 			<version>0.11.2</version>
 		</dependency>
@@ -78,10 +83,6 @@
             <artifactId>spring-security-core</artifactId>
             <version>5.6.1</version>
         </dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
 	</dependencies>
 
 	<build>
