@@ -9,4 +9,5 @@ public class OrderDTO {
     private long id;
     private long userId;
     private List<OrderPositionDTO> products;
+    private String status;
 }
