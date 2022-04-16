@@ -3,17 +3,19 @@ package com.example.blps.services;
 import com.example.blps.dto.OrderDTO;
 import com.example.blps.dto.OrderPositionDTO;
 import com.example.blps.dto.OrderStatusDTO;
-import com.example.blps.entities.Order;
-import com.example.blps.entities.OrderProduct;
-import com.example.blps.entities.OrderStatus;
-import com.example.blps.entities.Product;
+import com.example.blps.dto.UserOrderPositionDTO;
+import com.example.blps.entities.*;
 import com.example.blps.exceptions.WrongStatusException;
 import com.example.blps.repositories.OrderProductRepository;
 import com.example.blps.repositories.OrderRepository;
 import com.example.blps.repositories.StorageRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
@@ -21,12 +23,19 @@ import java.util.List;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class AdminService {
     private final TransactionTemplate transactionTemplate;
     private StorageRepository storageRepository;
     private OrderRepository orderRepository;
     private OrderProductRepository orderProductRepository;
+
+    public AdminService(StorageRepository storageRepository, OrderRepository orderRepository,
+                        OrderProductRepository orderProductRepository, PlatformTransactionManager transactionManager){
+        this.storageRepository = storageRepository;
+        this.orderRepository = orderRepository;
+        this.orderProductRepository = orderProductRepository;
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
+    }
 
     public List<OrderDTO> getOrdersByStatus(OrderStatusDTO input){
         try {
@@ -61,8 +70,34 @@ public class AdminService {
     }
 
     public boolean tryToAccept(long orderId){
-        //todo transactional realisation
-        return true;
+        return (boolean) transactionTemplate.execute(new TransactionCallback() {
+            @Override
+            public Boolean doInTransaction(TransactionStatus status){
+                    Order order = orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("Wrong id"));
+                    List<OrderProduct> products = orderProductRepository.findAllByKey_Order(order);
+                    if (order.getStatus() == OrderStatus.WAITING) {
+                        for (OrderProduct p : products) {
+                            Storage stor = storageRepository.findById(p.getKey().getProduct().getId()).orElseThrow(() -> new IllegalArgumentException("Wrong id"));
+                            if (stor.getCount() < p.getCount()) {
+                                order.setStatus(OrderStatus.NO_PRODUCTS);
+                                orderRepository.save(order);
+                                return false;
+                            }
+                        }
+                        for (OrderProduct p : products) {
+                            Storage stor = storageRepository.findById(p.getKey().getProduct().getId()).orElseThrow(() -> new IllegalArgumentException("Wrong id"));
+                            stor.setCount(stor.getCount() - p.getCount());
+                        }
+                        order.setStatus(OrderStatus.ACCEPTED);
+                        orderRepository.save(order);
+                        return true;
+                    }
+                    else{
+                        throw new WrongStatusException("Wrong status");
+                    }
+                }
+            }
+    );
     }
 
     public boolean sendOrder(long orderId){

@@ -44,29 +44,31 @@ public class ShoppingService {
     }
 
     public boolean addToCart(long productId, String username, long count){
-        try {
-
-            User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No such user"));
-            Product product = productRepository.findById(productId).orElseThrow(() -> new UsernameNotFoundException("No such product"));
-            ShoppingCart current = shoppingCartRepository.findByKey_UserAndKey_ProductAndConfirmed(user, product, false);
-            if (current!=null){
-                long currentCount = current.getCount();
-                current.setCount(currentCount + count);
-                shoppingCartRepository.save(current);
+        return (boolean) transactionTemplate.execute(new TransactionCallback() {
+            @Override
+            public Boolean doInTransaction(TransactionStatus status) {
+                try {
+                    User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No such user"));
+                    Product product = productRepository.findById(productId).orElseThrow(() -> new UsernameNotFoundException("No such product"));
+                    ShoppingCart current = shoppingCartRepository.findByKey_UserAndKey_ProductAndConfirmed(user, product, false);
+                    if (current != null) {
+                        long currentCount = current.getCount();
+                        current.setCount(currentCount + count);
+                        shoppingCartRepository.save(current);
+                    } else {
+                        ShoppingCart cart = new ShoppingCart();
+                        cart.setCount(count);
+                        cart.getKey().setUser(user);
+                        cart.getKey().setProduct(product);
+                        cart.setConfirmed(false);
+                        shoppingCartRepository.save(cart);
+                    }
+                    return true;
+                } catch (UsernameNotFoundException e) {
+                    return false;
+                }
             }
-            else{
-                ShoppingCart cart = new ShoppingCart();
-                cart.setCount(count);
-                cart.getKey().setUser(user);
-                cart.getKey().setProduct(product);
-                cart.setConfirmed(false);
-                shoppingCartRepository.save(cart);
-            }
-            return true;
-        }
-        catch(UsernameNotFoundException e){
-            return false;
-        }
+            });
     }
 
     public boolean confirmOrder(String username){
@@ -139,7 +141,7 @@ public class ShoppingService {
         }
 
     public boolean createOrderFromRequest(UserOrderDTO dto){
-        return transactionTemplate.execute(new TransactionCallback<Boolean>() {
+        return (boolean) transactionTemplate.execute(new TransactionCallback() {
             @Override
             public Boolean doInTransaction(TransactionStatus status){
                 try {
@@ -156,7 +158,7 @@ public class ShoppingService {
                         orderProductRepository.save(op);
                     }
                 }
-                catch(UsernameNotFoundException e){
+                catch(UsernameNotFoundException | NullPointerException e){
                     return false;
                 }
                 return true;
