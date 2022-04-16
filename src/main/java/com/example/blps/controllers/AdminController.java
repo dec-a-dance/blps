@@ -34,7 +34,7 @@ public class AdminController {
         }
     }
 
-    @PostMapping
+    @PostMapping("/sendOrder")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> sendOrder(@RequestBody OrderRequest req){
         if (adminService.sendOrder(req.getId())){
@@ -42,6 +42,23 @@ public class AdminController {
         }
         else{
             return new ResponseEntity<>("Something have gone wrong.", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/tryToAccept")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<String> tryToAccept(@RequestBody OrderRequest req){
+        try{
+            boolean result = adminService.tryToAccept(req.getId());
+            if(result){
+                return new ResponseEntity<>("Order accepted", HttpStatus.OK);
+            }
+            else{
+                return new ResponseEntity<>("Not enough products in storage", HttpStatus.OK);
+            }
+        }
+        catch(Exception e){
+            return new ResponseEntity<>("Something gone wrong", HttpStatus.BAD_REQUEST);
         }
     }
 }
