@@ -7,6 +7,10 @@ import com.example.blps.repositories.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -16,6 +20,7 @@ import java.util.List;
 @Slf4j
 @Service
 public class ShoppingService {
+    private final TransactionTemplate transactionTemplate;
     private final OrderProductRepository orderProductRepository;
     private final ShoppingCartRepository shoppingCartRepository;
     private final OrderRepository orderRepository;
@@ -23,12 +28,13 @@ public class ShoppingService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
-    public ShoppingService(OrderProductRepository orderProductRepository,
+    public ShoppingService(PlatformTransactionManager transactionManager, OrderProductRepository orderProductRepository,
                            ShoppingCartRepository shoppingCartRepository,
                            OrderRepository orderRepository,
                            UserRepository userRepository,
                            ProductRepository productRepository,
                            CategoryRepository categoryRepository){
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
         this.orderRepository = orderRepository;
         this.orderProductRepository = orderProductRepository;
         this.shoppingCartRepository = shoppingCartRepository;
@@ -133,24 +139,29 @@ public class ShoppingService {
         }
 
     public boolean createOrderFromRequest(UserOrderDTO dto){
-        try {
-            Order order = new Order();
-            User user = userRepository.findByUsername(dto.getUsername()).orElseThrow(() -> new UsernameNotFoundException("No such user"));
-            order.setUser(user);
-            Order fullOrder = orderRepository.save(order);
-            for (UserOrderPositionDTO d : dto.getProducts()) {
-                Product product = productRepository.findById(d.getProductId()).orElseThrow(() -> new UsernameNotFoundException("No such product"));
-                OrderProduct op = new OrderProduct();
-                op.setCount(d.getCount());
-                op.getKey().setOrder(fullOrder);
-                op.getKey().setProduct(product);
-                orderProductRepository.save(op);
+        return transactionTemplate.execute(new TransactionCallback<Boolean>() {
+            @Override
+            public Boolean doInTransaction(TransactionStatus status){
+                try {
+                    Order order = new Order();
+                    User user = userRepository.findByUsername(dto.getUsername()).orElseThrow(() -> new UsernameNotFoundException("No such user"));
+                    order.setUser(user);
+                    Order fullOrder = orderRepository.save(order);
+                    for (UserOrderPositionDTO d : dto.getProducts()) {
+                        Product product = productRepository.findById(d.getProductId()).orElseThrow(() -> new UsernameNotFoundException("No such product"));
+                        OrderProduct op = new OrderProduct();
+                        op.setCount(d.getCount());
+                        op.getKey().setOrder(fullOrder);
+                        op.getKey().setProduct(product);
+                        orderProductRepository.save(op);
+                    }
+                }
+                catch(UsernameNotFoundException e){
+                    return false;
+                }
+                return true;
             }
-        }
-        catch(UsernameNotFoundException e){
-            return false;
-        }
-        return true;
+            });
     }
 
     public List<ProductDTO> getProducts(){

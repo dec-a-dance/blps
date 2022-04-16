@@ -14,6 +14,7 @@ import com.example.blps.repositories.StorageRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class AdminService {
+    private final TransactionTemplate transactionTemplate;
     private StorageRepository storageRepository;
     private OrderRepository orderRepository;
     private OrderProductRepository orderProductRepository;
