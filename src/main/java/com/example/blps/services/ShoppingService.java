@@ -111,6 +111,7 @@ public class ShoppingService {
                 dto.setUserId(user.getId());
                 dto.setId(o.getId());
                 dto.setProducts(positions);
+                dto.setStatus(o.getStatus().name());
                 response.add(dto);
             }
             return response;

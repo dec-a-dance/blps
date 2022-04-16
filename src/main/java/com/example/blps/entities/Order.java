@@ -5,6 +5,8 @@ import lombok.Data;
 import javax.persistence.*;
 import java.util.Set;
 
+import static javax.persistence.EnumType.STRING;
+
 @Data
 @Entity(name="orders")
 @Table(name="orders")
@@ -16,4 +18,8 @@ public class Order {
 
     @OneToOne(fetch = FetchType.LAZY)
     private User user;
+
+    @Enumerated(STRING)
+    @Column(nullable = false, name="status")
+    private OrderStatus status;
 }
