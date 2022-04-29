@@ -38,7 +38,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> sendOrder(@RequestBody OrderRequest req){
         if (adminService.sendOrder(req.getId())){
-            return new ResponseEntity<>("Order've sent successfully.", HttpStatus.OK);
+            return new ResponseEntity<>("Order have been sent successfully.", HttpStatus.OK);
         }
         else{
             return new ResponseEntity<>("Something have gone wrong.", HttpStatus.BAD_REQUEST);

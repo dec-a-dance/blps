@@ -13,6 +13,9 @@ import java.io.Serializable;
 @Table(name="storage")
 public class Storage {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "product_id", referencedColumnName = "product_id")
     private Product product;

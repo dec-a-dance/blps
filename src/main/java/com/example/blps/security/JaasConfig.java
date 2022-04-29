@@ -1,6 +1,8 @@
 package com.example.blps.security;
 
 import com.example.blps.repositories.AuthTokenRepository;
+import com.example.blps.services.AuthService;
+import com.example.blps.util.XmlReader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,12 +18,12 @@ import java.util.Map;
 @Configuration
 @RequiredArgsConstructor
 public class JaasConfig {
-    private final AuthTokenRepository authTokenRepository;
+    private final XmlReader xml;
 
     @Bean
-    public InMemoryConfiguration configuration(AuthTokenRepository authTokenRepository){
-        Map<String, AuthTokenRepository> options = new HashMap<>();
-        options.put("authTokenRepository", authTokenRepository);
+    public InMemoryConfiguration configuration(XmlReader xml){
+        Map<String, XmlReader> options = new HashMap<>();
+        options.put("xmlReader", xml);
         AppConfigurationEntry[] configurationEntries = new AppConfigurationEntry[]{
                 new AppConfigurationEntry(JaasLoginModule.class.getCanonicalName(), AppConfigurationEntry.LoginModuleControlFlag.REQUIRED, options)
         };
@@ -34,7 +36,7 @@ public class JaasConfig {
     public AbstractJaasAuthenticationProvider jaasAuthenticationProvider(javax.security.auth.login.Configuration configuration) {
         DefaultJaasAuthenticationProvider provider = new DefaultJaasAuthenticationProvider();
         provider.setConfiguration(configuration);
-        provider.setAuthorityGranters(new AuthorityGranter[]{new CustomAuthorityGranter(authTokenRepository)});
+        provider.setAuthorityGranters(new AuthorityGranter[]{new CustomAuthorityGranter(xml)});
         return provider;
     }
 }

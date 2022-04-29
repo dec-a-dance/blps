@@ -2,6 +2,8 @@ package com.example.blps.security;
 
 import com.example.blps.entities.AuthToken;
 import com.example.blps.repositories.AuthTokenRepository;
+import com.example.blps.services.AuthService;
+import com.example.blps.util.XmlReader;
 import com.sun.security.auth.UserPrincipal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,7 +21,7 @@ import java.util.Map;
 public class JaasLoginModule implements LoginModule {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    private AuthTokenRepository authTokenRepository;
+    private XmlReader xml;
     private Subject subject;
     private CallbackHandler callbackHandler;
 
@@ -34,7 +36,7 @@ public class JaasLoginModule implements LoginModule {
             Map<String, ?> options){
         this.subject = subject;
         this.callbackHandler = callbackHandler;
-        this.authTokenRepository = (AuthTokenRepository) options.get("authTokenRepository");
+        this.xml = (XmlReader) options.get("xmlReader");
     }
 
     public boolean login(){
@@ -45,9 +47,10 @@ public class JaasLoginModule implements LoginModule {
             callbackHandler.handle(new Callback[]{nameCallback, passwordCallback});
             username = nameCallback.getName();
             String password = String.valueOf(passwordCallback.getPassword());
-            AuthToken authToken = authTokenRepository.findByUsername(username).orElseThrow(
-                    () -> new UsernameNotFoundException("User not found by email")
-            );
+            AuthToken authToken = xml.getToken(username);
+            if (authToken==null){
+                new UsernameNotFoundException("User not found by email");
+            }
             loginSucceeded = passwordEncoder.matches(password, authToken.getPassword());
         } catch (UsernameNotFoundException e) {
             log.warn("User with name = {} was not found during authentication", username);
