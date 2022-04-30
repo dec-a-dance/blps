@@ -3,6 +3,7 @@ package com.example.blps.security;
 import com.example.blps.entities.AuthToken;
 import com.example.blps.repositories.AuthTokenRepository;
 import com.example.blps.repositories.UserRepository;
+import com.example.blps.util.XmlReader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,7 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
-    private final AuthTokenRepository authTokenRepository;
+    private final XmlReader xml;
 
     @Override
     public void doFilterInternal(
@@ -32,9 +33,10 @@ public class JwtFilter extends OncePerRequestFilter {
         Optional<String> optionalJwt = getTokenFromRequest(request);
         if (optionalJwt.isPresent() && jwtUtil.tokenIsValid(optionalJwt.get())){
             String username = jwtUtil.subjectFromToken(optionalJwt.get());
-            AuthToken authToken = authTokenRepository.findByUsername(username).orElseThrow(
-                    () -> new RuntimeException("Failed to find user by username")
-            );
+            AuthToken authToken = xml.getToken(username);
+            if (authToken == null){
+                throw new RuntimeException("");
+            }
             SecurityContextHolder.getContext().setAuthentication(
                     new UsernamePasswordAuthenticationToken(authToken, null, authToken.getAuthorities())
             );
