@@ -4,6 +4,7 @@ import com.example.blps.dto.*;
 import com.example.blps.entities.AuthToken;
 import com.example.blps.entities.Category;
 import com.example.blps.entities.Product;
+import com.example.blps.security.JwtUtil;
 import com.example.blps.services.ShoppingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +20,12 @@ import java.util.List;
 @RequestMapping("/shop")
 public class ShoppingController {
     private final ShoppingService shoppingService;
+    private final JwtUtil jwt;
 
     @Autowired
-    public ShoppingController(ShoppingService shoppingService){
+    public ShoppingController(ShoppingService shoppingService, JwtUtil jwt){
         this.shoppingService=shoppingService;
+        this.jwt = jwt;
     }
 
     //типа показать ассортимент
@@ -35,8 +38,8 @@ public class ShoppingController {
     //добавить в корзину в бд
     @PostMapping("/addToCart")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<String> addToCart(@RequestBody AddToCartDTO dto){
-        boolean isAdded = shoppingService.addToCart(dto.getProductId(), dto.getUsername(), dto.getCount());
+    public ResponseEntity<String> addToCart(@RequestHeader("Authorization") String auth, @RequestBody AddToCartDTO dto){
+        boolean isAdded = shoppingService.addToCart(dto.getProductId(), jwt.subjectFromToken(auth.substring(7)), dto.getCount());
         if(isAdded){
             return new ResponseEntity<>("Successfully added to your cart.", HttpStatus.OK);
         }
@@ -48,8 +51,8 @@ public class ShoppingController {
     //по факту нужно послать только username
     @GetMapping("/getMyOrders")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<List<OrderDTO>> getOrders(@RequestBody AuthToken token){
-        List<OrderDTO> orders = shoppingService.getUserOrders(token.getUsername());
+    public ResponseEntity<List<OrderDTO>> getOrders(@RequestHeader("Authorization") String auth){
+        List<OrderDTO> orders = shoppingService.getUserOrders(jwt.subjectFromToken(auth.substring(7)));
         if(orders!=null) {
             return new ResponseEntity<>(orders, HttpStatus.OK);
         }
@@ -63,8 +66,8 @@ public class ShoppingController {
     //по факту нужно послать только username
     @PostMapping("/confirmOrder")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<String> confirmOrder(@RequestBody AuthToken token){
-        boolean isConfirmed = shoppingService.confirmOrder(token.getUsername());
+    public ResponseEntity<String> confirmOrder(@RequestHeader("Authorization") String auth){
+        boolean isConfirmed = shoppingService.confirmOrder(jwt.subjectFromToken(auth.substring(7)));
         if(isConfirmed){
             return new ResponseEntity<>("Successfully confirmed your order", HttpStatus.OK);
         }
@@ -76,8 +79,8 @@ public class ShoppingController {
     //удалить из корзины в бд
     @DeleteMapping("/deleteFromCart")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<String> deleteFromCart(@RequestBody AddToCartDTO dto){
-        int isDeleted = shoppingService.deleteFromCart(dto.getUsername(), dto.getProductId());
+    public ResponseEntity<String> deleteFromCart(@RequestHeader("Authorization") String auth, @RequestBody AddToCartDTO dto){
+        int isDeleted = shoppingService.deleteFromCart(jwt.subjectFromToken(auth.substring(7)), dto.getProductId());
         if(isDeleted>0){
             return new ResponseEntity<>("Successfully deleted from your cart.", HttpStatus.OK);
         }
@@ -102,8 +105,8 @@ public class ShoppingController {
     //по факту нужно послать только username
     @GetMapping("/getMyCart")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<List<OrderPositionDTO>> getCart(@RequestBody AuthToken token){
-        List<OrderPositionDTO> cart = shoppingService.getCart(token.getUsername());
+    public ResponseEntity<List<OrderPositionDTO>> getCart(@RequestHeader("Authorization") String auth, @RequestBody AuthToken token){
+        List<OrderPositionDTO> cart = shoppingService.getCart(jwt.subjectFromToken(auth.substring(7)));
         if(cart!=null) {
             return new ResponseEntity<>(cart, HttpStatus.OK);
         }

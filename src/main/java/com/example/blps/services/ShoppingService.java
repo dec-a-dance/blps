@@ -80,6 +80,7 @@ public class ShoppingService {
             }
             Order order = new Order();
             order.setUser(user);
+            order.setStatus(OrderStatus.WAITING);
             Order fullOrder = orderRepository.save(order);
             for (ShoppingCart c : carts) {
                 OrderProduct ent = new OrderProduct();
