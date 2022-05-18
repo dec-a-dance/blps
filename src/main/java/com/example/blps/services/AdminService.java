@@ -10,7 +10,10 @@ import com.example.blps.repositories.OrderProductRepository;
 import com.example.blps.repositories.OrderRepository;
 import com.example.blps.repositories.StorageRepository;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -20,21 +23,31 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 @Slf4j
 @Service
 public class AdminService {
     private final TransactionTemplate transactionTemplate;
-    private StorageRepository storageRepository;
-    private OrderRepository orderRepository;
-    private OrderProductRepository orderProductRepository;
+    private final StorageRepository storageRepository;
+    private final OrderRepository orderRepository;
+    private final OrderProductRepository orderProductRepository;
+    private final Producer producer;
 
-    public AdminService(StorageRepository storageRepository, OrderRepository orderRepository,
-                        OrderProductRepository orderProductRepository, PlatformTransactionManager transactionManager){
+    public AdminService(TransactionTemplate transactionTemplate,
+                        StorageRepository storageRepository,
+                        OrderRepository orderRepository,
+                        OrderProductRepository orderProductRepository){
+        this.transactionTemplate=transactionTemplate;
         this.storageRepository = storageRepository;
         this.orderRepository = orderRepository;
         this.orderProductRepository = orderProductRepository;
-        this.transactionTemplate = new TransactionTemplate(transactionManager);
+        Properties props = new Properties();
+        props.put("bootstrap.servers", "localhost:9092");
+        props.put("acks", "all");
+        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        this.producer = new KafkaProducer<>(props);
     }
 
     public List<OrderDTO> getOrdersByStatus(OrderStatusDTO input){
@@ -105,6 +118,7 @@ public class AdminService {
             Order order = orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("Wrong id"));
             if (order.getStatus() == OrderStatus.ACCEPTED) {
                 order.setStatus(OrderStatus.SENT);
+                orderRepository.save(order);
                 return true;
             } else {
                 throw new WrongStatusException("Wrong status");

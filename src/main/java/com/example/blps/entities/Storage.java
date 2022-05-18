@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
@@ -20,6 +21,7 @@ public class Storage {
     @JoinColumn (name = "product_id", referencedColumnName = "product_id")
     private Product product;
 
+    @Min(0)
     @Column(name="count")
     private long count;
 }
