@@ -7,11 +7,13 @@ import com.example.blps.repositories.ProductRepository;
 import com.example.blps.repositories.StorageRepository;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
@@ -42,10 +44,10 @@ public class StorageManager {
     }
 
     @Scheduled(fixedRate=120000)
-    public Boolean checkStorage(){
-        return (Boolean) transactionTemplate.execute(new TransactionCallback() {
+    public void checkStorage(){
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
-            public Boolean doInTransaction(TransactionStatus status) {
+            public void doInTransactionWithoutResult(TransactionStatus status) {
                 List<Order> orders = orderRepository.findAllByStatus(OrderStatus.NO_PRODUCTS);
                 for (Order o : orders) {
                     List<OrderProduct> products = orderProductRepository.findAllByKey_Order(o);
@@ -57,8 +59,8 @@ public class StorageManager {
                     }
                     o.setStatus(OrderStatus.ACCEPTED);
                     orderRepository.save(o);
+                    producer.send(new ProducerRecord<String, Long>("products-appeared", o.getUser().getName(), o.getId()));
                 }
-                return true;
             }
     });
     }
