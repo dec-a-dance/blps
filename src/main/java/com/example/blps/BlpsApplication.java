@@ -1,5 +1,6 @@
 package com.example.blps;
 
+import com.example.blps.message.KafkaProducerImpl;
 import com.example.blps.util.XmlReader;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -25,6 +26,11 @@ public class BlpsApplication extends SpringBootServletInitializer {
 	@Bean
 	protected XmlReader xmlReader(){
 		return new XmlReader();
+	}
+
+	@Bean
+	protected KafkaProducerImpl kafkaProducerImpl (){
+		return new KafkaProducerImpl();
 	}
 }
 

@@ -6,6 +6,7 @@ import com.example.blps.dto.OrderStatusDTO;
 import com.example.blps.dto.UserOrderPositionDTO;
 import com.example.blps.entities.*;
 import com.example.blps.exceptions.WrongStatusException;
+import com.example.blps.message.KafkaProducerImpl;
 import com.example.blps.repositories.OrderProductRepository;
 import com.example.blps.repositories.OrderRepository;
 import com.example.blps.repositories.StorageRepository;
@@ -32,22 +33,18 @@ public class AdminService {
     private final StorageRepository storageRepository;
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
-    private final Producer producer;
+    private final KafkaProducerImpl producer;
 
     public AdminService(TransactionTemplate transactionTemplate,
                         StorageRepository storageRepository,
                         OrderRepository orderRepository,
-                        OrderProductRepository orderProductRepository){
+                        OrderProductRepository orderProductRepository,
+                        KafkaProducerImpl producer){
         this.transactionTemplate=transactionTemplate;
         this.storageRepository = storageRepository;
         this.orderRepository = orderRepository;
         this.orderProductRepository = orderProductRepository;
-        Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
-        props.put("acks", "all");
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        this.producer = new KafkaProducer<>(props);
+        this.producer = producer;
     }
 
     public List<OrderDTO> getOrdersByStatus(OrderStatusDTO input){
@@ -92,8 +89,7 @@ public class AdminService {
                         for (OrderProduct p : products) {
                             Storage stor = storageRepository.findById(p.getKey().getProduct().getId()).orElseThrow(() -> new IllegalArgumentException("Wrong id"));
                             if (stor.getCount() < p.getCount()) {
-                                order.setStatus(OrderStatus.NO_PRODUCTS);
-                                orderRepository.save(order);
+                                producer.sendChangeOrderStatus(order, OrderStatus.NO_PRODUCTS);
                                 return false;
                             }
                         }
@@ -101,8 +97,7 @@ public class AdminService {
                             Storage stor = storageRepository.findById(p.getKey().getProduct().getId()).orElseThrow(() -> new IllegalArgumentException("Wrong id"));
                             stor.setCount(stor.getCount() - p.getCount());
                         }
-                        order.setStatus(OrderStatus.ACCEPTED);
-                        orderRepository.save(order);
+                        producer.sendChangeOrderStatus(order, OrderStatus.ACCEPTED);
                         return true;
                     }
                     else{
@@ -117,8 +112,7 @@ public class AdminService {
         try {
             Order order = orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("Wrong id"));
             if (order.getStatus() == OrderStatus.ACCEPTED) {
-                order.setStatus(OrderStatus.SENT);
-                orderRepository.save(order);
+                producer.sendChangeOrderStatus(order, OrderStatus.SENT);
                 return true;
             } else {
                 throw new WrongStatusException("Wrong status");

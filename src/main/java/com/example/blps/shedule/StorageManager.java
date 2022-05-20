@@ -1,6 +1,7 @@
 package com.example.blps.shedule;
 
 import com.example.blps.entities.*;
+import com.example.blps.message.KafkaProducerImpl;
 import com.example.blps.repositories.OrderProductRepository;
 import com.example.blps.repositories.OrderRepository;
 import com.example.blps.repositories.ProductRepository;
@@ -25,22 +26,18 @@ public class StorageManager {
     private final StorageRepository storageRepository;
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
-    private final Producer producer;
+    private final KafkaProducerImpl producer;
 
     public StorageManager(TransactionTemplate transactionTemplate,
                           StorageRepository storageRepository,
                           OrderRepository orderRepository,
-                          OrderProductRepository orderProductRepository){
+                          OrderProductRepository orderProductRepository,
+                          KafkaProducerImpl producer){
         this.transactionTemplate = transactionTemplate;
         this.storageRepository = storageRepository;
         this.orderRepository = orderRepository;
         this.orderProductRepository = orderProductRepository;
-        Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
-        props.put("acks", "all");
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        this.producer = new KafkaProducer<>(props);
+        this.producer = producer;
     }
 
     @Scheduled(fixedRate=120000)
@@ -59,7 +56,7 @@ public class StorageManager {
                     }
                     o.setStatus(OrderStatus.ACCEPTED);
                     orderRepository.save(o);
-                    producer.send(new ProducerRecord<String, Long>("products-appeared", o.getUser().getName(), o.getId()));
+                    producer.sendProductsAppeared(o);
                 }
             }
     });
