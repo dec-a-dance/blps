@@ -9,7 +9,7 @@ import java.util.Objects;
 
 @Data
 @AllArgsConstructor
-public class ChangeOrderStatusMessage extends AbstractMessage implements Serializable {
+public class ChangeOrderStatusMessage implements Serializable {
     private String username;
     private long orderId;
     private String email;

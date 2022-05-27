@@ -60,13 +60,8 @@ public class AdminController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> tryToAccept(@RequestBody OrderRequest req){
         try{
-            boolean result = adminService.tryToAccept(req.getId());
-            if(result){
-                return new ResponseEntity<>("Order accepted", HttpStatus.OK);
-            }
-            else{
-                return new ResponseEntity<>("Not enough products in storage", HttpStatus.OK);
-            }
+            adminService.tryToAccept(req.getId());
+            return new ResponseEntity<>("Order is trying to be accepted, check order status.", HttpStatus.OK);
         }
         catch(Exception e){
             return new ResponseEntity<>("Something gone wrong", HttpStatus.BAD_REQUEST);

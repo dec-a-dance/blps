@@ -6,8 +6,6 @@ import lombok.Data;
 
 @Data
 public class AddToCartDTO {
-    private String username;
-
     private long productId;
 
     private long count;

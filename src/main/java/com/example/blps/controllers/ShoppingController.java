@@ -105,7 +105,7 @@ public class ShoppingController {
     //по факту нужно послать только username
     @GetMapping("/getMyCart")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<List<OrderPositionDTO>> getCart(@RequestHeader("Authorization") String auth, @RequestBody AuthToken token){
+    public ResponseEntity<List<OrderPositionDTO>> getCart(@RequestHeader("Authorization") String auth){
         List<OrderPositionDTO> cart = shoppingService.getCart(jwt.subjectFromToken(auth.substring(7)));
         if(cart!=null) {
             return new ResponseEntity<>(cart, HttpStatus.OK);

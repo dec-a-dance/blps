@@ -79,33 +79,9 @@ public class AdminService {
         }
     }
 
-    public boolean tryToAccept(long orderId){
-        return (boolean) transactionTemplate.execute(new TransactionCallback() {
-            @Override
-            public Boolean doInTransaction(TransactionStatus status){
-                    Order order = orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("Wrong id"));
-                    List<OrderProduct> products = orderProductRepository.findAllByKey_Order(order);
-                    if (order.getStatus() == OrderStatus.WAITING) {
-                        for (OrderProduct p : products) {
-                            Storage stor = storageRepository.findById(p.getKey().getProduct().getId()).orElseThrow(() -> new IllegalArgumentException("Wrong id"));
-                            if (stor.getCount() < p.getCount()) {
-                                producer.sendChangeOrderStatus(order, OrderStatus.NO_PRODUCTS);
-                                return false;
-                            }
-                        }
-                        for (OrderProduct p : products) {
-                            Storage stor = storageRepository.findById(p.getKey().getProduct().getId()).orElseThrow(() -> new IllegalArgumentException("Wrong id"));
-                            stor.setCount(stor.getCount() - p.getCount());
-                        }
-                        producer.sendChangeOrderStatus(order, OrderStatus.ACCEPTED);
-                        return true;
-                    }
-                    else{
-                        throw new WrongStatusException("Wrong status");
-                    }
-                }
-            }
-    );
+    public void tryToAccept(long orderId){
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("Wrong id"));
+        producer.sendChangeOrderStatus(order, OrderStatus.ACCEPTED);
     }
 
     public boolean sendOrder(long orderId){
