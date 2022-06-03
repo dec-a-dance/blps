@@ -62,8 +62,6 @@ public class ShoppingController {
     }
 
 
-    //оформить корзину в бд в заказ
-    //по факту нужно послать только username
     @PostMapping("/confirmOrder")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<String> confirmOrder(@RequestHeader("Authorization") String auth){
