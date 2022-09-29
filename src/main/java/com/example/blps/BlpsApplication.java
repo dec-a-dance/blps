@@ -15,15 +15,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @SpringBootApplication
-public class BlpsApplication extends SpringBootServletInitializer {
+public class BlpsApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(BlpsApplication.class, args);
-	}
-
-	@Override
-	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-		return builder.sources(BlpsApplication.class);
 	}
 
 	@Bean

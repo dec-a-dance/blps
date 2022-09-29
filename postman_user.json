@@ -1,0 +1,292 @@
+{
+	"info": {
+		"_postman_id": "0a9fd9d7-b690-4813-88e7-c65dc6685e1f",
+		"name": "user",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12043458"
+	},
+	"item": [
+		{
+			"name": "register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"admin\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:2023/blps/auth/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2023",
+					"path": [
+						"blps",
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"exemee\",\r\n    \"password\": \"12345\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:2022/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2022",
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get categories",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:2022/shop/getCategories",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2022",
+					"path": [
+						"shop",
+						"getCategories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get products",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:2022/shop/getProducts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2022",
+					"path": [
+						"shop",
+						"getProducts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get by category",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 3\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:2022/shop/getByCategory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2022",
+					"path": [
+						"shop",
+						"getByCategory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add to cart",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"exemee\",\r\n    \"productId\": 1,\r\n    \"count\": 3\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:2022/shop/addToCart",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2022",
+					"path": [
+						"shop",
+						"addToCart"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete from cart",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"test\",\r\n    \"productId\": 24\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:2022/shop/deleteFromCart",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2022",
+					"path": [
+						"shop",
+						"deleteFromCart"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get my cart",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"test\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:2022/shop/getMyCart",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2022",
+					"path": [
+						"shop",
+						"getMyCart"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "confirm order",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"exemee\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:2022/shop/confirmOrder",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2022",
+					"path": [
+						"shop",
+						"confirmOrder"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get my orders",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"test\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:2022/shop/getMyOrders",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "2022",
+					"path": [
+						"shop",
+						"getMyOrders"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

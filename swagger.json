@@ -1,0 +1,624 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Chip & Dip API",
+    "description": "BLPS lab. Alexey Kuznechenkov, Dmitriy Makhnin.",
+    "contact": {
+      "name": "Alexey \"dec-a-dance\" Kuznechenkov",
+      "url": "https://t.me/dec_a_dance"
+    },
+    "license": {
+      "name": "not licensed yet",
+      "url": "http://localhost/"
+    },
+    "version": "dev"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:2022",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "shopping",
+      "description": "all shopping operations"
+    },
+    {
+      "name": "admin",
+      "description": "Controller for all admin operations. Only users with ADMIN role can use this."
+    },
+    {
+      "name": "auth",
+      "description": "All requests, connected with authorization."
+    }
+  ],
+  "paths": {
+    "/shop/orders/confirm": {
+      "post": {
+        "tags": [
+          "shopping"
+        ],
+        "description": "confirm your cart as an order",
+        "operationId": "confirmOrder",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shop/cart": {
+      "get": {
+        "tags": [
+          "shopping"
+        ],
+        "description": "get the list of products in your cart",
+        "operationId": "getCart",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderPositionDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "shopping"
+        ],
+        "description": "add product to the cart",
+        "operationId": "addToCart",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddToCartDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "description": "register new user",
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "description": "login into account to get jwt token",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/orders/try-to-accept": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "description": "try to accept the order. Result - order became ACCEPTED or NO_PRODUCTS.",
+        "operationId": "tryToAccept",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/orders/send": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "description": "change order status to SENT",
+        "operationId": "sendOrder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shop/products": {
+      "get": {
+        "tags": [
+          "shopping"
+        ],
+        "description": "get the list of all products",
+        "operationId": "getProducts",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shop/orders": {
+      "get": {
+        "tags": [
+          "shopping"
+        ],
+        "description": "get the list of your orders",
+        "operationId": "getOrders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shop/categories": {
+      "get": {
+        "tags": [
+          "shopping"
+        ],
+        "description": "get the list of categories",
+        "operationId": "getCategories",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Category"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shop/categories/{id}": {
+      "get": {
+        "tags": [
+          "shopping"
+        ],
+        "description": "get the list of products of certain category",
+        "operationId": "getByCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/orders/{status}": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "description": "show all orders of certain status",
+        "operationId": "getOrdersByStatus",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shop/cart/{id}": {
+      "delete": {
+        "tags": [
+          "shopping"
+        ],
+        "description": "delete product from the cart",
+        "operationId": "deleteFromCart",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddToCartDTO": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RegisterDTO": {
+        "required": [
+          "email",
+          "password",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          },
+          "patronimic": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginDTO": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "OrderRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ProductDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "format": "float"
+          },
+          "category": {
+            "type": "string"
+          }
+        }
+      },
+      "OrderDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderPositionDTO"
+            }
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "OrderPositionDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "format": "float"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "minimum": 0,
+            "type": "number",
+            "format": "float"
+          },
+          "category": {
+            "$ref": "#/components/schemas/Category"
+          }
+        }
+      }
+    }
+  }
+}

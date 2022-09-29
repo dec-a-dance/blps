@@ -4,6 +4,8 @@ import com.example.blps.dto.OrderDTO;
 import com.example.blps.dto.OrderRequest;
 import com.example.blps.dto.OrderStatusDTO;
 import com.example.blps.services.AdminService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ import java.util.Properties;
 @Slf4j
 @RestController
 @RequestMapping("/admin")
+@Tag(name="admin", description = "Controller for all admin operations. Only users with ADMIN role can use this.")
 public class AdminController {
     private final AdminService adminService;
     private final Producer<String, String> producer;
@@ -33,9 +36,12 @@ public class AdminController {
         this.producer = new KafkaProducer(props);
     }
 
-    @GetMapping("/ordersByStatus")
+    @GetMapping("/orders/{status}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<List<OrderDTO>> getOrdersByStatus(@RequestBody OrderStatusDTO dto){
+    @Operation(description = "show all orders of certain status")
+    public ResponseEntity<List<OrderDTO>> getOrdersByStatus(@PathVariable String status){
+        OrderStatusDTO dto = new OrderStatusDTO();
+        dto.setStatus(status);
         List<OrderDTO> orders = adminService.getOrdersByStatus(dto);
         if (orders!=null){
             return new ResponseEntity<>(orders, HttpStatus.OK);
@@ -45,8 +51,9 @@ public class AdminController {
         }
     }
 
-    @PostMapping("/sendOrder")
+    @PostMapping("/orders/send")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(description = "change order status to SENT")
     public ResponseEntity<String> sendOrder(@RequestBody OrderRequest req){
         if (adminService.sendOrder(req.getId())){
             return new ResponseEntity<>("Order have been sent successfully.", HttpStatus.OK);
@@ -56,8 +63,9 @@ public class AdminController {
         }
     }
 
-    @PostMapping("/tryToAccept")
+    @PostMapping("/orders/try-to-accept")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(description = "try to accept the order. Result - order became ACCEPTED or NO_PRODUCTS.")
     public ResponseEntity<String> tryToAccept(@RequestBody OrderRequest req){
         try{
             adminService.tryToAccept(req.getId());
